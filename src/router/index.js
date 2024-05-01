@@ -2,6 +2,7 @@ import VueRouter from 'vue-router';
 
 // 登陆界面
 import Login from "@/pages/Login";
+import Register from '@/pages/Login/Register.vue';
 
 // 客户端界面
 import Connect from "@/pages/client/Connect"; // 连接中央服务器
@@ -101,6 +102,14 @@ const router = new VueRouter({
       redirect: '/login',
       meta: {
         title: '用户登录',
+      },
+    },
+    {
+      path: '/Register',
+      name: 'Register',
+      component: Register,
+      meta: {
+        title: '用户注册',
       },
     },
     {

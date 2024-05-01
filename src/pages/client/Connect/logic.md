@@ -1,0 +1,6 @@
+登录后跳转启动connect页面
+页面mounted时执行init函数
+往state中填入userId属性和UserIp属性（ip默认硬编码为10.128.4.13 ？）
+
+submitForm:执行时用mounted的获得的userid拼接出url
+将url传给vuex启动一个websocket连接

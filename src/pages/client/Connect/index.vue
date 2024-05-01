@@ -111,7 +111,7 @@ export default {
         },
       ],
       
-
+      //校验表单规则
       rules: {
         ip: [
           {
@@ -134,6 +134,7 @@ export default {
           { required: true, message: "请选择部门", trigger: "change" },
         ],
       },
+      //
       token: null,
       socket: null,
     };
@@ -318,6 +319,7 @@ export default {
     },
     getUserId() {
       // 从cookie中获取id
+      // 向服务器请求userid
       this.token = VueCookies.get("token");
       if (this.token) {
         axios({
@@ -391,7 +393,9 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           // let url = "http://" + this.ruleForm.ip + "/server/" + this.userId;
-          let url = "http://192.168.43.34:8000/server/" + this.userId;
+          // let url = "http://192.168.43.34:8000/server/" + this.userId;
+          // 本处实际上是和本地的后端建立连接
+          let url ="localhost:7000/server/"+this.userId;
           // 实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
           // 等同于socket = new WebSocket("ws://192.168.43.34:8000/server");
           let socketUrl = url.replace("https", "ws").replace("http", "ws");

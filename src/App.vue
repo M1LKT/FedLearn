@@ -32,6 +32,8 @@ export default {
     urlCheck() {
       if (
         this.$route.path.includes("login") ||
+        this.$route.path.includes("Login") ||
+        this.$route.path.includes("Register") ||
         this.$route.path.includes("/Test") ||
         this.$route.path.includes("/test")
       ) {

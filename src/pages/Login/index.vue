@@ -62,7 +62,7 @@
               </el-row>
               <el-row
                 ><el-col align="right">
-                  <span class="sign-up-text">注册账号</span>
+                  <span class="sign-up-text" @click="$router.push('/Register')">注册账号</span>
                 </el-col></el-row
               >
             </el-form-item>
@@ -74,17 +74,21 @@
 </template>
 
 <script>
+import router from "@/router";
 import { getUUID } from "@/utils";
 import axios from "axios";
 import VueCookies from "vue-cookies";
+
 
 export default {
   data() {
     return {
       BaseUrl: "http://192.168.43.34:7000/",
       loginApi: {
-        login: "User/user/login",
-        captcha: "User/captcha.jpg",
+        // login: "User/user/login",
+        // captcha: "User/captcha.jpg",
+        captcha:"common/captcha",
+        login:"user/login"
       },
       userType: "user",
       dataForm: {
@@ -110,6 +114,9 @@ export default {
   created() {
     this.getCaptcha();
   },
+  // mounted() {
+  //   this.getCaptcha();
+  // },
   watch: {
     userType: {
       handler(val) {
@@ -120,94 +127,169 @@ export default {
 
   methods: {
     // 提交表单
-    dataFormSubmit() {
-      let _this = this;
-      if (this.userType === "user") {
-        this.$refs["dataForm"].validate((valid) => {
-          if (valid) {
-            let param = {
-              username: this.dataForm.userName,
-              password: this.dataForm.password,
-              uuid: this.dataForm.uuid,
-              captcha: this.dataForm.captcha,
-            };
-            axios
-              .post(this.BaseUrl + this.loginApi["login"], param)
-              .then((res) => {
-                if (res.status === 200) {
-                  if (res.data.msg === "登录成功" && res.data.type == "0") {
-                    // this.$message.success("登录成功")
-                    // 用户端
-                    //登录记录
-                    sessionStorage.setItem("isLogin", 1);
-                    // console.log(res.data.token)
-                    VueCookies.set("token", res.data.token);
-                    // console.log(VueCookies.get("token")) // 实测可以拿到token
-                    this.$router.replace({ name: "Connect" });
+    // dataFormSubmit() {
+    //   let _this = this;
+    //   if (this.userType === "user") {
+    //     this.$refs["dataForm"].validate((valid) => {
+    //       if (valid) {
+    //         let param = {
+    //           username: this.dataForm.userName,
+    //           password: this.dataForm.password,
+    //           uuid: this.dataForm.uuid,
+    //           captcha: this.dataForm.captcha,
+    //         };
+    //         axios
+    //           .post(this.BaseUrl + this.loginApi["login"], param)
+    //           .then((res) => {
+    //             if (res.status === 200) {
+    //               if (res.data.msg === "登录成功" && res.data.type == "0") {
+    //                 // this.$message.success("登录成功")
+    //                 // 用户端
+    //                 //登录记录
+    //                 sessionStorage.setItem("isLogin", 1);
+    //                 // console.log(res.data.token)
+    //                 VueCookies.set("token", res.data.token);
+    //                 // console.log(VueCookies.get("token")) // 实测可以拿到token
+    //                 //转向用户端的主页
+    //                 this.$router.replace({ name: "Connect" });
                     
-                  } else {
-                    this.$message.error("用户名密码或者验证码错误")
-                    _this.getCaptcha();
-                  }
-                }
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          }
-        });
-      } else if (this.userType === "admin") {
-        this.$refs["dataForm"].validate((valid) => {
-          if (valid) {
-            let param = {
-              username: this.dataForm.userName,
-              password: this.dataForm.password,
-              uuid: this.dataForm.uuid,
-              captcha: this.dataForm.captcha,
+    //               } else {
+    //                 this.$message.error("用户名密码或者验证码错误")
+    //                 _this.getCaptcha();
+    //               }
+    //             }
+    //           })
+    //           .catch((err) => {
+    //             console.log(err);
+    //           });
+    //       }
+    //     });
+    //   } else if (this.userType === "admin") {
+    //     this.$refs["dataForm"].validate((valid) => {
+    //       if (valid) {
+    //         let param = {
+    //           username: this.dataForm.userName,
+    //           password: this.dataForm.password,
+    //           uuid: this.dataForm.uuid,
+    //           captcha: this.dataForm.captcha,
+    //         };
+    //         axios
+    //           .post(this.BaseUrl + this.loginApi["login"], param)
+    //           .then((res) => {
+    //             if (res.status === 200) {
+    //               if (res.data.msg === "登录成功" && res.data.type == "1") {
+    //                 // 用户端
+    //                 //登录记录
+    //                 sessionStorage.setItem("isLogin", 1);
+    //                 VueCookies.set("token", res.data.token);
+    //                 //管理员用户转向服务端
+    //                 this.$router.replace({ name: "Message" });
+    //               } else {
+    //                 _this.getCaptcha();
+    //               }
+    //             }
+    //           })
+    //           .catch((err) => {
+    //             console.log(err);
+    //           });
+    //       }
+    //     });
+    //   }
+    // },
+    dataFormSubmit(){
+      let _this=this;
+      //处理客户端登录逻辑
+      if(this.userType==="user"){
+        this.$refs["dataForm"].validate((valid)=>{
+          if(valid){
+            let loginParma={
+              username:this.dataForm.userName,
+              password:this.dataForm.password,
+              uuid:this.dataForm.uuid,
+              captcha:this.dataForm.captcha
             };
-            axios
-              .post(this.BaseUrl + this.loginApi["login"], param)
-              .then((res) => {
-                if (res.status === 200) {
-                  if (res.data.msg === "登录成功" && res.data.type == "1") {
-                    // 用户端
-                    //登录记录
-                    sessionStorage.setItem("isLogin", 1);
-                    VueCookies.set("token", res.data.token);
-                    this.$router.replace({ name: "Message" });
-                  } else {
-                    _this.getCaptcha();
-                  }
+            this.$serverRequest.post(this.loginApi["login"],loginParma).then((res)=>{
+              if(res.status===200){
+                if(res.data.msg==="登录成功" && res.data.type==="0"){
+                  sessionStorage.setItem("isLogin",1);
+                  VueCookies.set("token",res.data.token);
+                  this.$router.replace({name:"Connect"});
+                }else{
+                  this.$message.error("用户名密码或者验证码错误");
+                  _this.getCaptcha();
                 }
-              })
-              .catch((err) => {
-                console.log(err);
-              });
+              }
+            }).catch((err)=>{
+              console.log(err);
+            });
           }
         });
+      }//处理服务端登录逻辑
+      else if(this.userType==="admin"){
+        this.$refs["dataForm"].validate((valid)=>{
+          if(valid){
+            let loginParma={
+              username:this.dataForm.userName,
+              password:this.dataForm.password,
+              uuid:this.dataForm.uuid,
+              captcha:this.dataForm.captcha
+            };
+            this.$serverRequest.post(this.loginApi["login"],loginParma).then((res)=>{
+              if(res.status===200){
+                if(res.data.msg==="登录成功" && res.data.type==="1"){
+                  sessionStorage.setItem("isLogin",1);
+                  VueCookies.set("token",res.data.token);
+                  this.$router.replace({name:"Message"});
+                }else{
+                  _this.getCaptcha();
+                }
+              }
+            }).catch((err)=>{
+              console.log(err);
+            });
+          }
+        
+        })
       }
     },
     // 获取验证码
-    getCaptcha() {
+    // getCaptcha() {
+    //   this.dataForm.uuid = getUUID();
+    //   axios
+    //     .get(
+    //       this.BaseUrl +
+    //         this.loginApi["captcha"] +
+    //         "?uuid=" +
+    //         this.dataForm.uuid,
+    //       { responseType: "blob" }
+    //     )
+    //     .then((res) => {
+    //       if (res.status === 200) {
+    //         let blob = new Blob([res.data], { type: "image/jpeg" });
+    //         this.captchaPath = window.URL.createObjectURL(blob);
+    //       }
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //     });
+    // }, 
+    getCaptcha(){
       this.dataForm.uuid = getUUID();
-      axios
-        .get(
-          this.BaseUrl +
-            this.loginApi["captcha"] +
-            "?uuid=" +
-            this.dataForm.uuid,
-          { responseType: "blob" }
-        )
-        .then((res) => {
-          if (res.status === 200) {
-            let blob = new Blob([res.data], { type: "image/jpeg" });
-            this.captchaPath = window.URL.createObjectURL(blob);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
+      this.$serverRequest.get(
+        this.loginApi["captcha"],
+        {
+          params:{
+            uuid:this.dataForm.uuid
+          },
+          responseType: "blob"
+        }
+      ).then((res) => {
+        if (res.status === 200) {
+          let blob = new Blob([res.data], { type: "image/jpeg" });
+          this.captchaPath = window.URL.createObjectURL(blob);
+        }
+      })
+    }
   },
 };
 </script>

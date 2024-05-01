@@ -22,6 +22,8 @@ import Contextmenu from "vue-contextmenujs";
 
 import VueCookies from 'vue-cookies';
 
+import { localRequest,serverRequest } from './utils/httpRequest';
+
 import dayjs from "dayjs"
 Vue.prototype.$dayjs = dayjs;
 
@@ -67,3 +69,6 @@ Vue.filter('formatDateTime', function (value) {
   // 拼接日期时间字符串并返回
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 });
+
+Vue.prototype.$localRequest= localRequest;
+Vue.prototype.$serverRequest= serverRequest;
