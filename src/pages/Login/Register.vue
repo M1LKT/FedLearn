@@ -23,10 +23,17 @@
               @keyup.enter.native="dataFormSubmit()"
               status-icon
             >
+              <el-form-item prop="phone">
+                <el-input
+                  v-model="dataForm.phone"
+                  placeholder="帐号(手机号码)"
+                  prefix-icon="el-icon-user-solid"
+                ></el-input>
+              </el-form-item>
               <el-form-item prop="userName">
                 <el-input
                   v-model="dataForm.userName"
-                  placeholder="帐号"
+                  placeholder="用户名"
                   prefix-icon="el-icon-user-solid"
                 ></el-input>
               </el-form-item>
@@ -38,17 +45,25 @@
                   prefix-icon="el-icon-view"
                 ></el-input>
               </el-form-item>
-              <el-form-item prop="captcha">
-                <el-row :gutter="20" type="flex" align="middle">
-                  <el-col :span="9">
-                    <el-input v-model="dataForm.captcha" placeholder="验证码">
-                    </el-input>
-                  </el-col>
-                  <el-col :span="15" class="login-captcha">
-                    <img :src="captchaPath" @click="getCaptcha()" alt="" />
-                  </el-col>
-                </el-row>
+              <el-form-item prop="checkpassword">
+                <el-input
+                  v-model="dataForm.checkpassword"
+                  type="password"
+                  placeholder="确认密码"
+                  prefix-icon="el-icon-view"
+                ></el-input>
               </el-form-item>
+              <el-form-item prop="captcha">
+              <el-row :gutter="20" type="flex" align="middle">
+                <el-col :span="9">
+                  <el-input v-model="dataForm.captcha" placeholder="验证码">
+                  </el-input>
+                </el-col>
+                <el-col :span="15" class="login-captcha">
+                  <img :src="captchaPath" @click="getCaptcha()" alt="" />
+                </el-col>
+              </el-row>
+            </el-form-item>
               <el-form-item>
                 <el-row type="flex">
                   <el-col :span="24" align="center"
@@ -80,29 +95,48 @@
   
   export default {
     data() {
+        var validatePass2 = (rule, value, callback) => {
+            if (value === '') {
+            callback(new Error('请再次输入密码'));
+            } else if (value !== this.dataForm.password) {
+            callback(new Error('两次输入密码不一致!'));
+            } else {
+            callback();
+            }
+        };
       return {
         BaseUrl: "http://192.168.43.34:7000/",
         loginApi: {
-          login: "User/user/login",
-          captcha: "User/captcha.jpg",
+          register: "user/register",
+          captcha: "common/captcha",
         },
         userType: "user",
         dataForm: {
           userName: "",
           password: "",
           uuid: "",
+          checkpassword: "",
           captcha: "",
+          phone: "",
         },
         dataRule: {
-          userName: [
-            { required: true, message: "帐号不能为空", trigger: "blur" },
-          ],
-          password: [
+            userName: [
+            { required: true, message: "用户名不能为空", trigger: "blur" },
+            ],
+            password: [
             { required: true, message: "密码不能为空", trigger: "blur" },
-          ],
-          captcha: [
+            ],
+            checkpassword: [
+            {validator: validatePass2, trigger: 'blur'}
+            ],
+            captcha: [
             { required: true, message: "验证码不能为空", trigger: "blur" },
-          ],
+            ],
+            phone: [
+            { required: true, message: "手机号码不能为空", trigger: "blur" },
+            ],
+
+            
         },
         captchaPath: "",
       };
@@ -123,93 +157,81 @@
       dataFormSubmit() {
         let _this = this;
         if (this.userType === "user") {
-          this.$refs["dataForm"].validate((valid) => {
-            if (valid) {
-              let param = {
-                username: this.dataForm.userName,
+          this.$refs["dataForm"].validate((valid)=>{
+            if(valid){
+              let param={
+                nickName: this.dataForm.userName,
                 password: this.dataForm.password,
+                type:0,
                 uuid: this.dataForm.uuid,
                 captcha: this.dataForm.captcha,
+                phone: this.dataForm.phone,
               };
-              axios
-                .post(this.BaseUrl + this.loginApi["login"], param)
-                .then((res) => {
-                  if (res.status === 200) {
-                    if (res.data.msg === "登录成功" && res.data.type == "0") {
-                      // this.$message.success("登录成功")
-                      // 用户端
-                      //登录记录
-                      sessionStorage.setItem("isLogin", 1);
-                      // console.log(res.data.token)
-                      VueCookies.set("token", res.data.token);
-                      // console.log(VueCookies.get("token")) // 实测可以拿到token
-                      //转向用户端的主页
-                      this.$router.replace({ name: "Connect" });
-                      
-                    } else {
-                      this.$message.error("用户名密码或者验证码错误")
-                      _this.getCaptcha();
-                    }
-                  }
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
+              this.$serverRequest.post(this.loginApi["register"],param).then((res)=>{
+                if(res.code === 200){
+                  this.$message({
+                    message: "注册成功",
+                    type: "success",
+                  });
+                  this.$router.push("/Login");
+                }else{
+                  this.$message({
+                    message: res.msg,
+                    type: "error",
+                  });
+                  this.getCaptcha();
+                }
+              })
             }
-          });
-        } else if (this.userType === "admin") {
-          this.$refs["dataForm"].validate((valid) => {
-            if (valid) {
-              let param = {
-                username: this.dataForm.userName,
+          })
+        }else if(this.userType === "admin"){
+          this.$refs["dataForm"].validate((valid)=>{
+            if(valid){
+              let param={
+                nickName: this.dataForm.userName,
                 password: this.dataForm.password,
+                type:1,
                 uuid: this.dataForm.uuid,
                 captcha: this.dataForm.captcha,
+                phone: this.dataForm.phone,
               };
-              axios
-                .post(this.BaseUrl + this.loginApi["login"], param)
-                .then((res) => {
-                  if (res.status === 200) {
-                    if (res.data.msg === "登录成功" && res.data.type == "1") {
-                      // 用户端
-                      //登录记录
-                      sessionStorage.setItem("isLogin", 1);
-                      VueCookies.set("token", res.data.token);
-                      //管理员用户转向服务端
-                      this.$router.replace({ name: "Message" });
-                    } else {
-                      _this.getCaptcha();
-                    }
-                  }
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
+              this.$serverRequest.post(this.loginApi["register"],param).then((res)=>{
+                if(res.code === 200){
+                  this.$message({
+                    message: "注册成功",
+                    type: "success",
+                  });
+                  this.$router.push("/Login");
+                }else{
+                  this.$message({
+                    message: res.msg,
+                    type: "error",
+                  });
+                  this.getCaptcha();
+                }
+              })
             }
-          });
+          })
         }
       },
       // 获取验证码
-      getCaptcha() {
+      getCaptcha(){
         this.dataForm.uuid = getUUID();
-        axios
-          .get(
-            this.BaseUrl +
-              this.loginApi["captcha"] +
-              "?uuid=" +
-              this.dataForm.uuid,
-            { responseType: "blob" }
-          )
-          .then((res) => {
-            if (res.status === 200) {
-              let blob = new Blob([res.data], { type: "image/jpeg" });
-              this.captchaPath = window.URL.createObjectURL(blob);
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      },
+        this.$serverRequest.get(
+          this.loginApi["captcha"],
+          {
+            params:{
+              uuid:this.dataForm.uuid
+            },
+            responseType: "blob"
+          }
+        ).then((res) => {
+          if (res.status === 200) {
+            let blob = new Blob([res.data], { type: "image/jpeg" });
+            this.captchaPath = window.URL.createObjectURL(blob);
+          }
+        })
+      }
     },
   };
   </script>
