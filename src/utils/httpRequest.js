@@ -21,6 +21,7 @@ const localRequest = axios.create({
     'Content-Type': 'application/json; charset=utf-8'
   },
   baseURL: 'http://localhost:8000/'
+  // baseURL: 'http://localhost:9000/' // 本地调试
 })
 
 const serverRequest = axios.create({

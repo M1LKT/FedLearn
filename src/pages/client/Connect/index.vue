@@ -154,29 +154,46 @@ export default {
       console.log(this.ruleForm.name);
       console.log(this.ruleForm.department);
       console.log("-----------------------");
-      axios({
-        method: "post",
-        url: `http://192.168.43.34:7000/connect/getConnection`,
-        headers: {
-          token: this.token,
-        },
-        data: {
-          ip: this.ip,
-          userId: this.userId,
-          clientName: this.ruleForm.name,
-          department: this.ruleForm.department,
-        },
-        timeout: 30000,
-      }).then((res) => {
-        this.$message({
-          message: "请求连接信息发送成功",
-          type: "success",
-          offset: 100,
-        });
-        // this.agreeShow = true; // 开始转圈等待同意连接
-        this.agreeShow = true;
-        this.$store.commit("setAgreeShow", true);
-      });
+      let connectParma={
+        ip: this.ip,
+        userId: this.userId,
+        clientName: this.ruleForm.name,
+        department: this.ruleForm.department,
+      }
+      this.$localRequest.post('user/getConnection',connectParma).then((res)=>{
+        if(res.status===200){
+          this.$message({
+            message: "请求连接信息发送成功",
+            type: "success",
+            offset: 100,
+          });
+          this.agreeShow = true; // 开始转圈等待同意连接
+          this.$store.commit("setAgreeShow", true);
+        };
+      })
+      // axios({
+      //   method: "post",
+      //   url: `http://192.168.43.34:7000/connect/getConnection`,
+      //   headers: {
+      //     token: this.token,
+      //   },
+      //   data: {
+      //     ip: this.ip,
+      //     userId: this.userId,
+      //     clientName: this.ruleForm.name,
+      //     department: this.ruleForm.department,
+      //   },
+      //   timeout: 30000,
+      // }).then((res) => {
+      //   this.$message({
+      //     message: "请求连接信息发送成功",
+      //     type: "success",
+      //     offset: 100,
+      //   });
+      //   // this.agreeShow = true; // 开始转圈等待同意连接
+      //   this.agreeShow = true;
+      //   this.$store.commit("setAgreeShow", true);
+      // });
     },
     onMessage(event) {
       // 如果是请求处理信息，收到已经同意的信息，转圈等待停止，显示连接成功；如果是拒绝的信息，就关闭websocket
@@ -339,6 +356,7 @@ export default {
             return;
           });
       }
+      this.userId = "123";
     },
     getUserIP(onNewIP) {
       let MyPeerConnection =
@@ -393,9 +411,10 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           // let url = "http://" + this.ruleForm.ip + "/server/" + this.userId;
-          // let url = "http://192.168.43.34:8000/server/" + this.userId;
           // 本处实际上是和本地的后端建立连接
-          let url ="localhost:7000/server/"+this.userId;
+          let url ='http://localhost:8000/'+"webSocket/"+this.userId; //与本地后端建立连接，并且通知本地后端和服务器建立连接   
+          // 本地测试
+          // let url="ws://localhost:9000/helloWebSocket"
           // 实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
           // 等同于socket = new WebSocket("ws://192.168.43.34:8000/server");
           let socketUrl = url.replace("https", "ws").replace("http", "ws");

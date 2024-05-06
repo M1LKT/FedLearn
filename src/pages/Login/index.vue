@@ -213,6 +213,11 @@ export default {
                 if(res.data.msg==="登录成功" && res.data.type==="0"){
                   sessionStorage.setItem("isLogin",1);
                   VueCookies.set("token",res.data.token);
+                  this.$message({
+                    showClose:true,
+                    message:"登录成功",
+                    type:"success"
+                  })
                   this.$router.replace({name:"Connect"});
                 }else{
                   this.$message.error("用户名密码或者验证码错误");
@@ -239,6 +244,11 @@ export default {
                 if(res.data.msg==="登录成功" && res.data.type==="1"){
                   sessionStorage.setItem("isLogin",1);
                   VueCookies.set("token",res.data.token);
+                  this.$message({
+                    showClose:true,
+                    message:"登录成功",
+                    type:"success"
+                  })
                   this.$router.replace({name:"Message"});
                 }else{
                   _this.getCaptcha();
