@@ -651,17 +651,21 @@ export default {
       // 从cookie中获取id
       this.token = VueCookies.get("token");
       if (this.token) {
-        axios({
-          method: "get",
-          url: `http://192.168.43.34:7000/User/user/getUserId`,
-          headers: {
-            token: this.token,
-          },
-          timeout: 30000,
-        }).then((res) => {
+        this.$serverRequest.get("user/getUserId",{headers:{"token":this.token}}).then((res) => {
           this.userId = res.data.userId;
           console.log(this.userId);
         });
+        // axios({
+        //   method: "get",
+        //   url: `http://192.168.43.34:7000/User/user/getUserId`,
+        //   headers: {
+        //     token: this.token,
+        //   },
+        //   timeout: 30000,
+        // }).then((res) => {
+        //   this.userId = res.data.userId;
+        //   console.log(this.userId);
+        // });
       }
     },
     bar() {
@@ -907,7 +911,7 @@ export default {
       //  [ 6.000e+00,  3.000e+00,  9.610e-02],
       //  [ 6.000e+00,  4.000e+00,  1.597e-01],
       //  [ 6.000e+00,  5.000e+00,  2.162e-01],
-      //  [ 6.000e+00,  6.000e+00,  1.000e+00]]
+      //  [ 6.000e+00,  6.000e+00,  1.000e+00]] 
       this.arr
     .map(function (item) {
     return [item[1], item[0], item[2] || '-'];
@@ -1382,12 +1386,13 @@ export default {
       //上传文件的需要formdata类型;所以要转
       let FormDatas = new FormData();
       FormDatas.append("file", item.file);
-      axios({
-        method: "post",
-        url: `http://192.168.43.34:9000/file/upload?user_id=${this.userId}&data_name=${dataName}`,
+      this.$localRequest.post("file/upload",FormDatas,{
+        params:{
+          user_id:this.userId,
+          data_name:dataName
+        },
         headers: this.headers,
         timeout: 30000,
-        data: FormDatas,
       }).then((res) => {
         const result = res.data;
         if (result.msg.includes("文件上传成功")) {
@@ -1397,44 +1402,97 @@ export default {
           this.data_url = result.url;
           this.message = "文件上传成功,正在分析，请稍作等待";
           this.visible = true;
-          axios({
-            method: "get",
-            url: `http://192.168.43.34:9000/file/showDetail1?url=${this.data_url}&type=${this.type}`,
+          this.$localRequest.get("file/showDetail1",{
+            params:{
+              url:this.data_url,
+              type:this.type
+            },
             headers: this.headers,
-          })
-            .then((res) => {
-              // 在这里展示图表,可视化数据
-              this.n = res.data.n;
-              this.n2 = res.data.n2;
-              this.n3 = res.data.n3;
-              this.x1 = res.data.x1;
-              this.y1 = res.data.y1;
-              this.r1 = res.data.r1;
-              this.r2 = res.data.r2;
-              this.r3 = res.data.r3;
-              this.r21 = res.data.r21;
-              this.r22 = res.data.r22;
-              this.c1 = res.data.c1;
-              this.c2 = res.data.c2;
-              this.columns = res.data.columns;
-              this.arr = res.data.arr;
-              this.message = "";
-              this.visible = false;
-              this.heatmap();
-              this.bar();
-              this.pie();
-              this.classPie();
-              this.Nightingale();
-              this.$refs.reply.innerHTML = res.data.reply;
-            })
-            .catch((err) => {
-              this.message = "";
-              this.visible = false;
-            });
+          }).then((res) => {
+            // 在这里展示图表,可视化数据
+            this.n = res.data.n;
+            this.n2 = res.data.n2;
+            this.n3 = res.data.n3;
+            this.x1 = res.data.x1;
+            this.y1 = res.data.y1;
+            this.r1 = res.data.r1;
+            this.r2 = res.data.r2;
+            this.r3 = res.data.r3;
+            this.r21 = res.data.r21;
+            this.r22 = res.data.r22;
+            this.c1 = res.data.c1;
+            this.c2 = res.data.c2;
+            this.columns = res.data.columns;
+            this.arr = res.data.arr;
+            this.message = "";
+            this.visible = false;
+            this.heatmap();
+            this.bar();
+            this.pie();
+            this.classPie();
+            this.Nightingale();
+            this.$refs.reply.innerHTML = res.data.reply;
+          }).catch((err) => {
+            this.message = "";
+            this.visible = false;
+          });
         } else {
           this.$message.warning(`文件上传失败，请重新上传`);
         }
       });
+      // axios({
+      //   method: "post",
+      //   url: `http://192.168.43.34:9000/file/upload?user_id=${this.userId}&data_name=${dataName}`,
+      //   headers: this.headers,
+      //   timeout: 30000,
+      //   data: FormDatas,
+      // }).then((res) => {
+      //   const result = res.data;
+      //   if (result.msg.includes("文件上传成功")) {
+      //     this.$message.success("文件上传成功");
+      //     // 将后端传来的数据存储
+      //     this.trainId = result.trainId;
+      //     this.data_url = result.url;
+      //     this.message = "文件上传成功,正在分析，请稍作等待";
+      //     this.visible = true;
+      //     axios({
+      //       method: "get",
+      //       url: `http://192.168.43.34:9000/file/showDetail1?url=${this.data_url}&type=${this.type}`,
+      //       headers: this.headers,
+      //     })
+      //       .then((res) => {
+      //         // 在这里展示图表,可视化数据
+      //         this.n = res.data.n;
+      //         this.n2 = res.data.n2;
+      //         this.n3 = res.data.n3;
+      //         this.x1 = res.data.x1;
+      //         this.y1 = res.data.y1;
+      //         this.r1 = res.data.r1;
+      //         this.r2 = res.data.r2;
+      //         this.r3 = res.data.r3;
+      //         this.r21 = res.data.r21;
+      //         this.r22 = res.data.r22;
+      //         this.c1 = res.data.c1;
+      //         this.c2 = res.data.c2;
+      //         this.columns = res.data.columns;
+      //         this.arr = res.data.arr;
+      //         this.message = "";
+      //         this.visible = false;
+      //         this.heatmap();
+      //         this.bar();
+      //         this.pie();
+      //         this.classPie();
+      //         this.Nightingale();
+      //         this.$refs.reply.innerHTML = res.data.reply;
+      //       })
+      //       .catch((err) => {
+      //         this.message = "";
+      //         this.visible = false;
+      //       });
+      //   } else {
+      //     this.$message.warning(`文件上传失败，请重新上传`);
+      //   }
+      // });
     },
     //导入methods中的函数
     ...methods,
@@ -1543,23 +1601,38 @@ export default {
     //下载函数
     dataDownload() {
       if (this.trainId) {
-        axios({
-          method: "get",
-          url: `http://192.168.43.34:9000/file/getModelUrlByTrainId?trainId=${this.trainId}`,
-          // url: "/guo/test/modelDownload?trainId=4a432dddeb77f581be8d250380ab49b9",
+        this.$localRequest.get("file/getModelUrlByTrainId",{
+          params:{
+            trainId:this.trainId
+          },
           headers: this.headers,
-        })
-          .then((res) => {
-            const url = res.data.preprocessDataUrl;
-            if (url) {
-              this.download("preprocessData", url);
-              window.URL.revokeObjectURL(url);
-              this.$message.success("预处理数据集下载成功");
-            } else {
-              this.$message.warning(`未存在已预处理好的数据集`);
-            }
-          })
-          .catch((err) => {});
+        }).then((res) => {
+          const url = res.data.modelUrl;
+          if (url) {
+            this.download("model", url);
+            window.URL.revokeObjectURL(url);
+            this.$message.success("模型下载成功");
+          } else {
+            this.$message.warning(`未存在已训练好的模型`);
+          }
+        }).catch((err) => {});
+        // axios({
+        //   method: "get",
+        //   url: `http://192.168.43.34:9000/file/getModelUrlByTrainId?trainId=${this.trainId}`,
+        //   // url: "/guo/test/modelDownload?trainId=4a432dddeb77f581be8d250380ab49b9",
+        //   headers: this.headers,
+        // })
+        //   .then((res) => {
+        //     const url = res.data.preprocessDataUrl;
+        //     if (url) {
+        //       this.download("preprocessData", url);
+        //       window.URL.revokeObjectURL(url);
+        //       this.$message.success("预处理数据集下载成功");
+        //     } else {
+        //       this.$message.warning(`未存在已预处理好的数据集`);
+        //     }
+        //   })
+        //   .catch((err) => {});
       }
     },
     //判断节点是否被连接

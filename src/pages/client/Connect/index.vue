@@ -412,7 +412,7 @@ export default {
         if (valid) {
           // let url = "http://" + this.ruleForm.ip + "/server/" + this.userId;
           // 本处实际上是和本地的后端建立连接
-          let url ='http://localhost:8000/'+"webSocket/"+this.userId; //与本地后端建立连接，并且通知本地后端和服务器建立连接   
+          let url ='http://localhost:8000/'+"webSocket"; //与本地后端建立连接，并且通知本地后端和服务器建立连接   
           // 本地测试
           // let url="ws://localhost:9000/helloWebSocket"
           // 实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
