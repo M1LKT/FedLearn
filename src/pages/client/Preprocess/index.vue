@@ -1537,56 +1537,106 @@ export default {
       }
       const idArray = sortedNodeList.map((node) => node.id);
       const idString = idArray.join(",");
-      axios({
-        method: "get",
-        url: `http://192.168.43.34:9000/process/train?trainId=${this.trainId}&idString=${idString}`,
+      this.$localRequest.get("process/train",{
+        params:{
+          trainId:this.trainId,
+          idString:idString
+        },
         headers: this.headers,
-      })
-        .then((res) => {
+      }).then((res) => {
+        this.message = "";
+        this.visible = false;
+        this.preprocess_data = res.data.retInfo; // 返回了预处理完后的数据集的url
+        console.log(res);
+        // 感觉这里应该是要请求数据
+        this.$localRequest.get("file/showDetail2",{
+          params:{
+            url:res.data.retInfo,
+            type:this.type
+          },
+          headers: this.headers,
+        }).then((res) => {
+          // 在这里展示图表,可视化数据
+          this.nAfter = res.data.n;
+          this.n2After = res.data.n2;
+          this.n3After = res.data.n3;
+          this.x1After = res.data.x1;
+          this.y1After = res.data.y1;
+          this.r1After = res.data.r1;
+          this.r2After = res.data.r2;
+          this.r3After = res.data.r3;
+          this.r21After = res.data.r21;
+          this.r22After = res.data.r22;
+          this.c1After = res.data.c1;
+          this.c2After = res.data.c2;
+          this.columnsAfter = res.data.columns;
+          this.arrAfter = res.data.arr;
           this.message = "";
           this.visible = false;
-          this.preprocess_data = res.data.retInfo; // 返回了预处理完后的数据集的url
-          console.log(res);
-          // 感觉这里应该是要请求数据
-          axios({
-            method: "get",
-            url: `http://192.168.43.34:9000/file/showDetail2?url=${res.data.retInfo}&type=${this.type}`,
-            headers: this.headers,
-          })
-            .then((res) => {
-              // 在这里展示图表,可视化数据
-              this.nAfter = res.data.n;
-              this.n2After = res.data.n2;
-              this.n3After = res.data.n3;
-              this.x1After = res.data.x1;
-              this.y1After = res.data.y1;
-              this.r1After = res.data.r1;
-              this.r2After = res.data.r2;
-              this.r3After = res.data.r3;
-              this.r21After = res.data.r21;
-              this.r22After = res.data.r22;
-              this.c1After = res.data.c1;
-              this.c2After = res.data.c2;
-              this.columnsAfter = res.data.columns;
-              this.arrAfter = res.data.arr;
-              this.message = "";
-              this.visible = false;
-              this.heatmapAfter();
-              this.barAfter();
-              this.pieAfter();
-              this.classPieAfter();
-              this.NightingaleAfter();
-            })
-            .catch((err) => {
-              this.message = "";
-              this.visible = false;
-            });
-        })
-        .catch((err) => {
-          console.log(err);
+          this.heatmapAfter();
+          this.barAfter();
+          this.pieAfter();
+          this.classPieAfter();
+          this.NightingaleAfter();
+        }).catch((err) => {
           this.message = "";
           this.visible = false;
         });
+      }).catch((err) => {
+        console.log(err);
+        this.message = "";
+        this.visible = false;
+      });
+      // axios({
+      //   method: "get",
+      //   url: `http://192.168.43.34:9000/process/train?trainId=${this.trainId}&idString=${idString}`,
+      //   headers: this.headers,
+      // })
+      //   .then((res) => {
+      //     this.message = "";
+      //     this.visible = false;
+      //     this.preprocess_data = res.data.retInfo; // 返回了预处理完后的数据集的url
+      //     console.log(res);
+      //     // 感觉这里应该是要请求数据
+      //     axios({
+      //       method: "get",
+      //       url: `http://192.168.43.34:9000/file/showDetail2?url=${res.data.retInfo}&type=${this.type}`,
+      //       headers: this.headers,
+      //     })
+      //       .then((res) => {
+      //         // 在这里展示图表,可视化数据
+      //         this.nAfter = res.data.n;
+      //         this.n2After = res.data.n2;
+      //         this.n3After = res.data.n3;
+      //         this.x1After = res.data.x1;
+      //         this.y1After = res.data.y1;
+      //         this.r1After = res.data.r1;
+      //         this.r2After = res.data.r2;
+      //         this.r3After = res.data.r3;
+      //         this.r21After = res.data.r21;
+      //         this.r22After = res.data.r22;
+      //         this.c1After = res.data.c1;
+      //         this.c2After = res.data.c2;
+      //         this.columnsAfter = res.data.columns;
+      //         this.arrAfter = res.data.arr;
+      //         this.message = "";
+      //         this.visible = false;
+      //         this.heatmapAfter();
+      //         this.barAfter();
+      //         this.pieAfter();
+      //         this.classPieAfter();
+      //         this.NightingaleAfter();
+      //       })
+      //       .catch((err) => {
+      //         this.message = "";
+      //         this.visible = false;
+      //       });
+      //   })
+      //   .catch((err) => {
+      //     console.log(err);
+      //     this.message = "";
+      //     this.visible = false;
+      //   });
     },
     //下载辅助函数
     download(filename, link) {

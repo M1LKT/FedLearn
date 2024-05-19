@@ -169,6 +169,7 @@ export default {
   },
   created() {
     this.init();
+    this.getTableData();
   },
   mounted() {},
   watch: {
@@ -299,6 +300,16 @@ export default {
       this.lossData = lossLineData;
       this.timeData = timeLineData;
       // console.log(this.accuracyData);
+    },
+    //根据id获取表格数据  
+    getTableData(){
+      this.$localRequest.get("file/getTableData",{
+        params: {
+          id: this.$store.state.userId,
+        },
+      }).then((res) => {
+        this.$store.commit("setTableData", res.data);
+      });
     },
   },
 };

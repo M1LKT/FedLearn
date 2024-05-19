@@ -113,33 +113,59 @@ export default {
         });
         this.id = this.id + 1;
         this.textareaData = "";
-        axios
-          .post("http://192.168.43.34:9000/chat/message", {
-            message: message,
-          },
-          {
-            headers: {
-              token: this.token,
-            }
-          })
-          .then((response) => {
-            console.log(response.data);
-            this.chatMessages.push({
-              id: this.id + 1,
-              role: "assistant",
-              content: response.data.reply,
-            });
-            this.id = this.id + 1;
-          })
-          .catch((error) => {
-            this.chatMessages.push({
-              id: this.id + 1,
-              role: "assistant",
-              content: "好的",
-            });
-            this.id = this.id + 1;
-          });
-      } else {
+      //   axios
+      //     .post("http://192.168.43.34:9000/chat/message", {
+      //       message: message,
+      //     },
+      //     {
+      //       headers: {
+      //         token: this.token,
+      //       }
+      //     })
+      //     .then((response) => {
+      //       console.log(response.data);
+      //       this.chatMessages.push({
+      //         id: this.id + 1,
+      //         role: "assistant",
+      //         content: response.data.reply,
+      //       });
+      //       this.id = this.id + 1;
+      //     })
+      //     .catch((error) => {
+      //       this.chatMessages.push({
+      //         id: this.id + 1,
+      //         role: "assistant",
+      //         content: "好的",
+      //       });
+      //       this.id = this.id + 1;
+      //     });
+      this.$localRequest.post("/chat/message", 
+        {
+          message: message,
+        },
+        {
+          headers: {
+            token: this.token,
+          }
+        }
+      ).then((response) => {
+        console.log(response.data);
+        this.chatMessages.push({
+          id: this.id + 1,
+          role: "assistant",
+          content: response.data.reply,
+        });
+        this.id = this.id + 1;
+      }).catch((error) => {
+        this.chatMessages.push({
+          id: this.id + 1,
+          role: "assistant",
+          content: "好的",
+        });
+        this.id = this.id + 1;
+      } );
+      }
+      else {
         console.log("error");
       }
     },
