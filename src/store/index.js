@@ -128,6 +128,15 @@ const mutations = {
     setTableData(state, tableData) {
         state.tableData[0] = tableData;
     },
+    setAccuracyData(state, accuracyData) {
+        state.accuracyData.push(accuracyData);
+    },
+    setLossData(state, lossData) {
+        state.lossData.push(lossData);
+    },
+    setTimeData(state, timeData) {
+        state.timeData.push(timeData);
+    },
 }
 
 // 用于存储数据
@@ -165,6 +174,9 @@ const state = {
     loading: true,
     messageShow: false,
     agreeShow: false,
+    accuracyData:[], //准确率：[[80,81,79,83],[80,81,79,83],[80,81,79,83]]形式的嵌套数组
+    lossData: [],
+    timeData: [],
     
 }
 

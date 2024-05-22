@@ -16,22 +16,22 @@ const http = axios.create({
 
 const localRequest = axios.create({
   timeout: 1000 * 30,
-  withCredentials: true,
+  // withCredentials: true,
   headers: {
     'Content-Type': 'application/json; charset=utf-8'
   },
-  baseURL: 'http://localhost:8000/'
-  // baseURL: 'http://localhost:9000/' // 本地调试
+  // baseURL: 'http://localhost:8000/'
+  baseURL: 'http://localhost:9000/' // 本地调试
 })
 
 const serverRequest = axios.create({
   timeout: 1000 * 30,
-  withCredentials: true,
+  // withCredentials: true,
   headers: {
     'Content-Type': 'application/json; charset=utf-8'
   },
-  baseURL: 'http://192.168.43.34:9000/'
-  // baseURL: 'http://localhost:9000/' // 本地调试
+  // baseURL: 'http://192.168.43.34:9000/'
+  baseURL: 'http://localhost:9000/' // 本地调试 
 })
 /**
  * 请求拦截

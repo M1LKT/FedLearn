@@ -229,7 +229,9 @@ export default {
         let trans_data = event.data.split(";")[1];
         console.log("trans_data----" + trans_data);
         let trans_dataArray = trans_data.split(",");
-        console.log("trans_dataArray----" + trans_dataArray);
+        console.log("trans_dataArray----" ,trans_dataArray);
+        //方法同步信息：2;CNNB,xx算法,xxx方法,xxxx方法,1000轮：2代表是方法同步信息，后续五个参数分别是：差分隐私，同态加密，压缩方法，联邦方法，聚合轮次（请按顺序）
+        //transdataarray[0]差分隐私，transdataarray[1]同态加密，transdataarray[2]压缩方法，transdataarray[3]联邦方法，transdataarray[4]聚合轮次
         let tableData = [
           {
             algori: null,
@@ -239,47 +241,11 @@ export default {
             epochs: null,
           },
         ];
-        axios({
-          method: "get",
-          url: `http://192.168.43.34:7000/component/getMethodName/${trans_dataArray[0]}`,
-          headers: {
-            token: this.token,
-          },
-          timeout: 30000,
-        }).then((res) => {
-          tableData[0].algori = res.data.methodName;
-        });
-        axios({
-          method: "get",
-          url: `http://192.168.43.34:7000/component/getMethodName/${trans_dataArray[1]}`,
-          headers: {
-            token: this.token,
-          },
-          timeout: 30000,
-        }).then((res) => {
-          tableData[0].compress = res.data.methodName;
-        });
-        axios({
-          method: "get",
-          url: `http://192.168.43.34:7000/component/getMethodName/${trans_dataArray[2]}`,
-          headers: {
-            token: this.token,
-          },
-          timeout: 30000,
-        }).then((res) => {
-          tableData[0].chafen = res.data.methodName;
-        });
-        axios({
-          method: "get",
-          url: `http://192.168.43.34:7000/component/getMethodName/${trans_dataArray[3]}`,
-          headers: {
-            token: this.token,
-          },
-          timeout: 30000,
-        }).then((res) => {
-          tableData[0].jiami = res.data.methodName;
-        });
-        tableData[0].epochs = trans_dataArray[4];
+        tableData[0].algori=trans_dataArray[0];
+        tableData[0].compress=trans_dataArray[1];
+        tableData[0].chafen=trans_dataArray[2];
+        tableData[0].jiami=trans_dataArray[3];
+        tableData[0].epochs=trans_dataArray[4];
         console.log("tableDate----"+tableData[0]);
 
         this.$store.commit("setTableData", tableData[0]);
@@ -287,7 +253,17 @@ export default {
         this.tableData = tableData;
         console.log("-------------")
       }
-
+      // 序号为3，表示是同步的模型数据
+      if(event.data.split(",")[0] == "3"){
+        //模型同步数据：3;[88,51,89,98,99],10,13.1,分别为准确率，loss，通信时间
+        let trans_data = JSON.parse(event.data.split(";")[1]);
+        // console.log("trans_data----",trans_data );
+        // console.log(trans_data[0]);
+        this.$store.commit("setAccuracyData",trans_data[0]);
+        // console.log(this.$store.state.accuracyData);
+        this.$store.commit("setLossData",trans_data[1]);
+        this.$store.commit("setTimeData",trans_data[2]);
+      }
       // this.message = event.data;
       // console.log('Received message: ' + this.message);
     },
@@ -412,11 +388,10 @@ export default {
         if (valid) {
           // let url = "http://" + this.ruleForm.ip + "/server/" + this.userId;
           // 本处实际上是和本地的后端建立连接
-          let url ='http://localhost:8000/'+"webSocket"; //与本地后端建立连接，并且通知本地后端和服务器建立连接   
+          // let url ='http://localhost:8000/'+"webSocket"; //与本地后端建立连接，并且通知本地后端和服务器建立连接   
           // 本地测试
-          // let url="ws://localhost:9000/helloWebSocket"
+          let url="ws://localhost:9000/helloWebSocket"
           // 实现化WebSocket对象，指定要连接的服务器地址与端口  建立连接
-          // 等同于socket = new WebSocket("ws://192.168.43.34:8000/server");
           let socketUrl = url.replace("https", "ws").replace("http", "ws");
           this.$store.dispatch("createWebSocket", socketUrl);
           console.log(socketUrl);

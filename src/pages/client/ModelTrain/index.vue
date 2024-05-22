@@ -38,7 +38,7 @@
         <div>
           <el-statistic
             group-separator=","
-            :value="allRound"
+            :value="tableData[0].epochs"
             title="总轮次"
           ></el-statistic>
         </div>
@@ -47,7 +47,7 @@
         <div>
           <el-statistic
             group-separator=","
-            :value="nowRound"
+            :value="roundCount"
             title="目前轮次"
           ></el-statistic>
         </div>
@@ -64,13 +64,13 @@
       </el-row>
       <el-row v-if="accuracyData.length != 0">
         <el-col :span="16" :offset="4">
-          <DrawLine
+          <!-- <DrawLine
             chartId="accuracyChart"
             :Linedata="accuracyData"
             textContent="准确率变化"
             yAxisAdd="%"
-          ></DrawLine>
-          <DrawLine
+          ></DrawLine> -->
+          <!-- <DrawLine
             chartId="lossChart"
             :Linedata="lossData"
             textContent="loss变化"
@@ -79,6 +79,24 @@
           <DrawLine
             chartId="timeChart"
             :Linedata="timeData"
+            textContent="通信时间变化"
+            yAxisAdd="s"
+          ></DrawLine> -->
+          <DrawLine
+            chartId="accuracyChart"
+            :Linedata="processedAccuracyData"
+            textContent="准确率变化"
+            yAxisAdd="%"
+          ></DrawLine>
+          <DrawLine
+            chartId="lossChart"
+            :Linedata="trueLossData"
+            textContent="loss变化"
+            yAxisAdd=""
+          ></DrawLine>
+          <DrawLine
+            chartId="timeChart"
+            :Linedata="trueTimeData"
             textContent="通信时间变化"
             yAxisAdd="s"
           ></DrawLine>
@@ -106,6 +124,7 @@ export default {
   },
   data() {
     return {
+      shouldRefresh: true,
       securityCom: this.$store.state.securityCom,
       tableData: [
         {
@@ -116,10 +135,26 @@ export default {
           jiami: this.$store.state.tableData[0].jiami,
         },
       ],
+      trueTimeData: [{
+              mydata: this.$store.state.timeData
+          }],
+      trueLossData: [{
+              mydata: this.$store.state.lossData
+          }],
+      // transPosedAccuracyData: [
+      //   this.$store.state.accuracyData[0].map((_, i) => this.$store.state.accuracyData.map(row => row[i]))
+      //     ],
+      transPosedAccuracyData:[],
+      trueAccuracyData:this.transPosedAccuracyData,
+      // processedAccuracyData: this.transPosedAccuracyData.map((item, index) => ({
+      //   mydata: item,
+      //   name: `类别${index + 1}`
+      // })),
+      processedAccuracyData: [],
       show: this.$store.state.show, //显示哪个弹出框
 
       // 总轮次
-      allRound: 1000,
+      allRound: 2000,
       // 目前轮次
       nowRound: 1,
       // 图表的数据
@@ -165,11 +200,13 @@ export default {
       accuracyData: [],
       lossData: [],
       timeData: [],
+      roundCount: 0,
     };
   },
   created() {
     this.init();
-    this.getTableData();
+  },
+  beforeDestroy(){
   },
   mounted() {},
   watch: {
@@ -178,6 +215,35 @@ export default {
         this.dataFormat();
       },
       deep: true,
+    },
+    trueTimeData:{
+      handler() {
+        let temp = [];
+        this.roundCount = this.trueTimeData[0].mydata.length;
+        this.transPosedAccuracyData= [
+          this.$store.state.accuracyData[0].map((_, i) => this.$store.state.accuracyData.map(row => row[i]))
+        ],
+        this.transPosedAccuracyData.forEach((nestedArray, index) => {
+          nestedArray.forEach((item, nestedIndex) => {
+            // console.log(`Item ${nestedIndex}:`, item);
+            temp.push({
+              mydata: item,
+              name: `类别${nestedIndex + 1}`,
+            });
+          });
+        });
+        console.log(temp);
+        this.processedAccuracyData = temp;
+        this.trueLossData=[{
+              mydata: this.$store.state.lossData
+          }];
+        this.trueTimeData=[{
+              mydata: this.$store.state.timeData
+          }];
+        // console.log(this.roundCount);
+      },
+      deep: true,
+      
     },
   },
   destroyed() {
@@ -241,7 +307,7 @@ export default {
           this.nowRound += 1;
         }
         this.getData();
-      }, 500);
+      }, 2000);
     },
     // 分割获取到的图表数据变为折线图数据
     dataFormat() {
@@ -300,16 +366,11 @@ export default {
       this.lossData = lossLineData;
       this.timeData = timeLineData;
       // console.log(this.accuracyData);
-    },
-    //根据id获取表格数据  
-    getTableData(){
-      this.$localRequest.get("file/getTableData",{
-        params: {
-          id: this.$store.state.userId,
-        },
-      }).then((res) => {
-        this.$store.commit("setTableData", res.data);
-      });
+      // console.log(this.transPosedAccuracyData);
+      // console.log(this.processedAccuracyData)
+      // console.log(this.lossData);
+      // console.log(this.timeData);
+      // console.log(this.trueTimeData);
     },
   },
 };
@@ -395,3 +456,19 @@ export default {
   clear: both;
 }
 </style>
+
+
+<!-- [
+  {
+    mydata:[1,5,9],
+    name:""
+  },
+  {
+    mydata:[2,12,21],
+    name:""
+  },
+  {
+    mydata:[3,1,62] 
+    name:""
+  }
+] -->
